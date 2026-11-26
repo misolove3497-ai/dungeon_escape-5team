@@ -17,7 +17,7 @@
 """
 from characters.player import Archer, Mage, Warrior
 from game.battle import Battle, BattleResult
-from game.ui import read_choice
+from game.ui import GameQuitRequested, confirm_quit, read_choice
 from items.inventory import Inventory
 from items.item import Potion
 from monsters.monster import create_monsters
@@ -55,13 +55,16 @@ class Game:
         print("=" * 40)
         print("         DUNGEON ESCAPE")
         print("=" * 40)
-        while True:
-            print("\n1. 게임 시작  2. 종료")
-            if read_choice("선택: ", 1, 2) == 2:
-                print("게임을 종료합니다.")
-                return
-            self._new_run()
-            self._play_run()
+        try:
+            while True:
+                print("\n1. 게임 시작  2. 종료")
+                if read_choice("선택: ", 1, 2) == 2:
+                    break
+                self._new_run()
+                self._play_run()
+        except GameQuitRequested:
+            pass  # 게임 도중 종료를 확정한 경우
+        print("게임을 종료합니다.")
 
     # ------------------------------------------------------------------
     # 게임 진행 흐름
@@ -121,8 +124,13 @@ class Game:
         for stage in range(1, self._highest_unlocked + 1):
             mark = "클리어" if stage in self._cleared else "미클리어"
             print(f"  {stage}. 스테이지 {stage} ({mark})")
-        choice = read_choice("스테이지 번호: ", 1, self._highest_unlocked)
-        return self._check_stage_unlocked(choice)
+        print("  0. 게임 종료")
+        while True:
+            choice = read_choice("스테이지 번호: ", 0, self._highest_unlocked)
+            if choice == 0:
+                confirm_quit()  # '아니오'면 스테이지 목록으로 돌아간다.
+                continue
+            return self._check_stage_unlocked(choice)
 
     def _check_stage_unlocked(self, stage):
         """선택한 스테이지가 열려 있는지 확인한다.
@@ -178,9 +186,14 @@ class Game:
         print("\n어떻게 진행할까요?")
         print(f"  1. 다음 스테이지로 (스테이지 {stage + 1})")
         print(f"  2. 같은 스테이지 반복 (스테이지 {stage})")
-        if read_choice("선택: ", 1, 2) == 1:
-            return stage + 1
-        return stage
+        print("  3. 게임 종료")
+        while True:
+            choice = read_choice("선택: ", 1, 3)
+            if choice == 1:
+                return stage + 1
+            if choice == 2:
+                return stage
+            confirm_quit()  # '아니오'면 같은 선택 화면을 다시 보여 준다.
 
     def _on_defeat(self, stage):
         """패배 처리: HP를 전부 회복하고 이전 스테이지 번호를 돌려준다.

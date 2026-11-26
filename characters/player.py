@@ -1,31 +1,40 @@
-class Unit:
+from core.unit import Unit
+
+class Player(Unit):
     def __init__(self, name, hp, atk):
-        self.name = name
-        self.hp = hp
-        self.atk = atk
+        super().__init__(name, hp, atk)
+        self.max_hp = hp
 
-    def attack(self, target):
-        target.take_damage(self.atk)
+    def heal(self, amount):
+        """HP를 amount만큼 회복한다 (max_hp를 넘지 않음). 실제 회복량을 반환한다.
 
-    def take_damage(self, dmg):
-        self.hp = max(0, self.hp - dmg)
-        print(f"  → {self.name} 체력 {self.hp}")
+        Unit의 __hp는 직접 바꿀 수 없으므로 take_damage(음수)로 HP를 올린다.
+        """
+        if amount <= 0 or not self.is_alive():
+            return 0
+        healed = min(amount, self.max_hp - self.hp)
+        self.take_damage(-healed)
+        return healed
 
-class Warrior(Unit):
-    def __init__(self, name):
+
+class Warrior(Player):
+    def __init__(self, name="전사"):
         super().__init__(name, 150, 12)
 
     def attack(self, target):
         print(f"{self.name}: 파워 스트라이크! ⚔️")
-        super().attack(target)
-class Mage(Unit):
-    def __init__(self, name):
+        target.take_damage(self.atk)
+
+
+class Mage(Player):
+    def __init__(self, name="마법사"):
         super().__init__(name, 90, 8)
         self.__mp = 50
 
     @property
     def mp(self):
         return self.__mp
+
     def attack(self, target):
         if self.__mp >= 10:
             self.__mp -= 10
@@ -33,10 +42,25 @@ class Mage(Unit):
             target.take_damage(self.atk * 2)
         else:
             print(f"{self.name}: 마나 부족... 지팡이로 툭")
-            super().attack(target)
-            
+            target.take_damage(self.atk)
+
+
+class Archer(Player):
+    def __init__(self, name="궁수"):
+        super().__init__(name, 110, 10)
+
+    def attack(self, target):
+        print(f"{self.name}: 연속 사격! 🏹")
+        target.take_damage(self.atk)
+
 
 if __name__ == "__main__":
     dummy = Warrior("허수아비")
-    w = Warrior("전사")
-    w.attack(dummy)
+    for p in (Warrior(), Mage(), Archer()):
+        p.attack(dummy)
+        print(f"  → {dummy.name} 체력 {dummy.hp}")
+
+    w = Warrior()
+    print(w.max_hp)        # 150
+    m = Mage()
+    print(m.max_hp)        # 90

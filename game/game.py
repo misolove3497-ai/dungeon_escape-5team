@@ -10,10 +10,10 @@
     monsters.monster  : create_monsters(floor) -> list[Monster]
     items.item        : Potion (인자 없이 생성 가능)
     items.inventory   : Inventory()
-                        .items        -> 아이템 목록 (list)
-                        .add(item)    -> 아이템 추가
-                        .use(index, user) -> 사용 결과 메시지(str),
-                                             소모품은 제거, 장비는 장착
+                        .items                 -> 아이템 목록 복사본 (list)
+                        .add_item(item)        -> 아이템 추가
+                        .use_item(index, user) -> 성공 True / 실패 False
+                                                  (실패 사유는 내부에서 출력)
 """
 from characters.player import Archer, Mage, Warrior
 from game.battle import Battle, BattleResult
@@ -108,7 +108,7 @@ class Game:
 
         # 시작 아이템: 포션 1개 (아이템 담당 구현에 맞춰 조정)
         self._inventory = Inventory()
-        self._inventory.add(Potion())
+        self._inventory.add_item(Potion())
         print(f"\n{self._player.name}을(를) 선택했습니다.")
 
     def _select_stage(self):

@@ -11,10 +11,12 @@ core/exceptions.py
 
     Exception                (파이썬 기본)
     └── GameError            (우리 게임의 모든 예외)
-        └── ItemError        (아이템/인벤토리 관련)
-            ├── ItemUseError
-            ├── InventoryFullError
-            └── ItemNotFoundError
+        ├── ItemError        (아이템/인벤토리 관련)
+        │   ├── ItemUseError
+        │   ├── InventoryFullError
+        │   └── ItemNotFoundError
+        ├── InvalidChoiceError   (메뉴 입력 관련)
+        └── StageLockedError     (스테이지 진행 관련)
 
   → except ItemError:  아이템 관련 오류만 잡기
   → except GameError:  게임에서 발생한 모든 오류 잡기
@@ -49,4 +51,17 @@ class InventoryFullError(ItemError):
 
 class ItemNotFoundError(ItemError):
     """없는 아이템(잘못된 번호 등)을 찾으려 할 때"""
+    pass
+
+
+# ============================================================
+# 게임 진행 · UI 관련 예외
+# ============================================================
+class InvalidChoiceError(GameError):
+    """메뉴에서 허용되지 않은 값을 입력했을 때 발생한다."""
+    pass
+
+
+class StageLockedError(GameError):
+    """아직 열리지 않은 스테이지를 선택했을 때 발생한다."""
     pass

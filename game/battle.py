@@ -8,7 +8,6 @@
 """
 from enum import Enum
 
-from core.exceptions import GameError
 from game.ui import read_choice
 
 
@@ -134,14 +133,9 @@ class Battle:
         if index == 0:
             return False
 
-        try:
-            message = self._inventory.use(index - 1, self._player)
-            print(message)
-            return True
-        except GameError as e:
-            # 아이템 사용 실패는 전투를 끝내지 않고 다시 선택하게 한다.
-            print(f"[아이템 사용 실패] {e}")
-            return False
+        # use_item은 성공 시 True, 실패 시 False를 반환하고 사유를 직접 출력한다.
+        # 실패하면 턴을 소비하지 않고 메뉴로 돌아간다.
+        return self._inventory.use_item(index - 1, self._player)
 
     def _monster_turn(self):
         """살아있는 몬스터가 차례로 플레이어를 공격한다."""

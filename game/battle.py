@@ -8,7 +8,7 @@
 """
 from enum import Enum
 
-from game.ui import read_choice
+from game.ui import confirm_quit, read_choice
 
 
 class BattleResult(Enum):
@@ -84,13 +84,19 @@ class Battle:
             print(f"  [{i}] {m.name}  HP {m.hp}  ATK {m.atk}")
 
     def _player_turn(self):
-        """플레이어 턴을 처리한다. 공격 또는 아이템 사용 중 하나를 끝낼 때까지 반복한다."""
+        """플레이어 턴을 처리한다. 공격 또는 아이템 사용 중 하나를 끝낼 때까지 반복한다.
+
+        3번(게임 종료)을 고르고 확인하면 GameQuitRequested가 발생해 전투가 중단된다.
+        """
         while True:
-            print("\n[내 턴] 1. 공격  2. 인벤토리(아이템/장비)")
-            choice = read_choice("선택: ", 1, 2)
+            print("\n[내 턴] 1. 공격  2. 인벤토리(아이템/장비)  3. 게임 종료")
+            choice = read_choice("선택: ", 1, 3)
             if choice == 1:
                 self._do_attack()
                 return
+            if choice == 3:
+                confirm_quit()  # '아니오'면 반환되어 메뉴를 다시 보여 준다.
+                continue
             if self._do_inventory():
                 return
             # 인벤토리에서 취소한 경우 턴을 넘기지 않고 다시 메뉴를 보여 준다.
